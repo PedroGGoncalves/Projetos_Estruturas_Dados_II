@@ -1,8 +1,9 @@
 #include <stdio.h>
-#include <conio.h>
 #include <stdlib.h>
 #include <string.h>
-
+/*
+Grupo Gustavo Rosseto e Pedro Gon√ßalves
+*/
 struct estrutura
   	{
     	char cliente[3],codfilme[3],nome[50], filme[50], genero[50];
@@ -12,7 +13,7 @@ char *identifica_campo(char *ts,int num)
 	if(num==1)
 		return strtok(ts,"#");
 }	
-int pega_registro(FILE *p_out, char *p_reg) //utilizado para saber se o registro est· vazio ou n„o
+int pega_registro(FILE *p_out, char *p_reg) //utilizado para saber se o registro est√° vazio ou n√£o
 {
      unsigned char bytes;
      unsigned int a=0 ;
@@ -31,7 +32,7 @@ void insercao(FILE  *out,FILE *insere)
 
 	fseek(insere,0,SEEK_END); //coloca o arquivo no fim
 	tam_arq=ftell(insere);   //pega tamnho do arquivo
-	fseek(insere,0,0);	     //coloca o arquivo no inÌcio
+	fseek(insere,0,0);	     //coloca o arquivo no in√≠cio
 
 	tam_reg=pega_registro(out,reg);
 	if (tam_reg==0) //nada no arquivo
@@ -40,18 +41,18 @@ void insercao(FILE  *out,FILE *insere)
    		fread(&film,sizeof(film),1,insere); 
    		temp=(ftell(insere))/156; 
    		sprintf(reg,"##%s#%s#%s#%s#%s#%c",film.cliente,film.codfilme,film.nome,film.filme,film.genero,temp);
-   		temp_2=strlen(reg); //temp2 armazenar· o tamanho do registro reg que ser· usado para se locomover no arquivo saida
+   		temp_2=strlen(reg); //temp2 armazenar√° o tamanho do registro reg que ser√° usado para se locomover no arquivo saida
    		//conf temp_2
 		sprintf(reg,"%c#%s#%s#%s#%s#%s#%c",temp_2,film.cliente,film.codfilme,film.nome,film.filme,film.genero,temp);
-   		fwrite(reg, sizeof(char), strlen(reg), out); //registro È escrito no arquivo
+   		fwrite(reg, sizeof(char), strlen(reg), out); //registro √© escrito no arquivo
 
    		}
-	else //j· tem conte˙do
+	else //j√° tem conte√∫do
 	{	
 		fseek(out,-1,SEEK_END); 
-		 //arquivo na penultima posiÁ„o
-		fread(&temp_2,sizeof(int),1,out); //ser· lido a temp_2 para saber em que parte do arquivo est·
-		fseek(out,0,SEEK_END); //coloca o arquivo saida na ultima posiÁ„o para inserÁ„o
+		 //arquivo na penultima posi√ß√£o
+		fread(&temp_2,sizeof(int),1,out); //ser√° lido a temp_2 para saber em que parte do arquivo est√°
+		fseek(out,0,SEEK_END); //coloca o arquivo saida na ultima posi√ß√£o para inser√ß√£o
 		fseek(insere,(temp_2)*156,0); //locomove o arquivo insere com a temp_2 salva
 
 		if((((int)temp_2)*156)>=tam_arq)  //se a temp_2 for maior que o tamanho arquivo insere significa que chegou ao fim
@@ -60,12 +61,12 @@ void insercao(FILE  *out,FILE *insere)
 		}
 
    		fread(&film,sizeof(film),1,insere); 
-   		temp=(ftell(insere)+2)/156; //temp que ser· utilizada para se mover no arquivo insere
+   		temp=(ftell(insere)+2)/156; //temp que ser√° utilizada para se mover no arquivo insere
    		//coloca dados no registro reg
    		sprintf(reg,"##%s#%s#%s#%s#%s#%c",film.cliente,film.codfilme,film.nome,film.filme,film.genero,temp);
-   		temp_2=strlen(reg); //temp2 armazenar· o tamanho do registro reg que ser· usado para se locomover no arquivo saida
+   		temp_2=strlen(reg); //temp2 armazenar√° o tamanho do registro reg que ser√° usado para se locomover no arquivo saida
    		sprintf(reg,"%c#%s#%s#%s#%s#%s#%c",temp_2,film.cliente,film.codfilme,film.nome,film.filme,film.genero,temp);
-   		fwrite(reg, sizeof(char), strlen(reg), out); //registro È escrito no arquivo
+   		fwrite(reg, sizeof(char), strlen(reg), out); //registro √© escrito no arquivo
 
 	}
 
@@ -88,14 +89,12 @@ int main()
 						if ((insere = fopen("insere.bin","r+b")) == NULL)
 						 {
 							printf("Nao foi possivel abrir o arquivo");
-							getche();
 							return 0;
 						 }
 						  printf("\ninsere.bin carregado");
 						if ((out = fopen("principal.bin","a+b")) == NULL)
 						 {
 							printf("Nao foi possivel abrir o arquivo");
-							getche();
 							return 0;
 						 }
 						printf("\nprincipal.bin carregado");
