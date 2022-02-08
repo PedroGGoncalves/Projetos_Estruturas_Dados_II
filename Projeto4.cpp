@@ -11,6 +11,7 @@ Grupo Gustavo Rosseto e Pedro Gonçalves
 //Posi =8 é 8 ou 7 (0,1,...) no vetor
 //overflow progressivo?
 //conf arq principal
+
 struct estrutura
   	{
     	char cliente[3],codfilme[3],nome[50], filme[50], genero[50];
@@ -38,6 +39,23 @@ int pega_registro(FILE *p_out, char *p_reg) //utilizado para saber se o registro
             return a;
           }  
 }
+
+void exibirTela (char *filme)			
+{
+	char *pch;
+	pch = identifica_campo(filme,1);
+	printf("Cod Cliente:%s\n",pch);
+	pch = identifica_campo(NULL,1);
+	printf("Cod Filme:%s\n",pch);
+	pch = identifica_campo(NULL,1);
+	printf("Nome Cliente:%s\n",pch);
+	pch = identifica_campo(NULL,1);
+	printf("Nome Filme:%s\n",pch);
+	pch = identifica_campo(NULL,1);
+	printf("Genero:%s\n",pch);
+	pch = identifica_campo(NULL,1);
+}
+
 void insercao(FILE  *out,FILE *insere, FILE *hashh)
 {
     int temp,temp_2=0,tam_reg,tam_arq,temp1,temp4=0,temp3;
@@ -53,7 +71,8 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 	fseek(out,0,0);
 	
 	tam_reg=pega_registro(out,reg); // tam_reg == 0, arquivo vazio
-	if (tam_reg==0) //nada no arquivo
+	
+	if (tam_reg==0) //nada no arquivo principal, nada foi inserido
 	{
 
    		fread(&film,sizeof(film),1,insere); 
@@ -65,23 +84,25 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
    		fwrite(reg, sizeof(char), strlen(reg), out); //registro é escrito no arquivo
 		
 		strcat(strcpy(temp2,film.cliente),film.codfilme); //copia o codigo cliente e concatena com o condifo do fime
-   		temp1=atoi(temp2);
+   		temp1=atoi(temp2);	//transforma em inteiro o valor concatenado da chave
    		
    		int cont=0;
    		
-		hash.chave=0; hash.RRN=0; hash.flag=0;
+		hash.chave=0; hash.RRN=0; hash.flag=0;	//zera as variaveis 
    		
-   		for(int i=0;i<TAM_HASH;i++)
+   		int i;
+   		for( i=0;i<TAM_HASH;i++)
    		{
-   			mat[i][0]=hash.chave; mat[i][1]=hash.RRN; mat[i][2]=hash.flag;
+   			mat[i][0]=hash.chave; mat[i][1]=hash.RRN; mat[i][2]=hash.flag;		//zerando a matriz inteira.
 		}
-   		fseek(hashh,0,0); //tem q escrever no começo (nesse teste) e ta indo no final
-   		//ve pq
+		
+   		fseek(hashh,0,0); //rewind hash
+   		
    		hash.chave=temp1;
    		hash.RRN=0;//posi no arq principal
    		hash.flag=1; //1 existe    		//0 vazio vdd   		//-1 vazio falso
    		
-   		int posi;
+   		int posi;	//divisao inteira				
    		posi=hash.chave%TAM_HASH;
    		printf("\n'%d'+'%d' (%d)\n",atoi(film.cliente),atoi(film.codfilme),temp1);
    		printf("Endereco: %d\n", posi);
@@ -92,9 +113,42 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
    		cont=0;
 		do
 		{
-		
-			sprintf(reg2,"%c%c%c",mat[cont][0],mat[cont][1],mat[cont][2]);
-   			fwrite(reg2, sizeof(char), 3, hashh); //registro é escrito no arquivo
+			int tempp=mat[cont][0];
+			int conta_digito=0;
+			temp3=0;
+			do //qtos digitos tem
+			{
+				tempp=tempp/10; conta_digito++;
+			}while(tempp>=1);
+			do
+			{
+				sprintf(reg2,"%d",temp3);
+				fwrite(reg2, sizeof(char), strlen(reg2), hashh);
+				conta_digito++;
+			}while(conta_digito<5);
+			
+			sprintf(reg2,"%d",mat[cont][0]);
+   			fwrite(reg2, sizeof(char), strlen(reg2), hashh); //registro é escrito no arquivo 
+   			
+   			tempp=mat[cont][1];
+			conta_digito=0;
+			temp3=0;
+			do //qtos digitos tem
+			{
+				tempp=tempp/10; conta_digito++;
+			}while(tempp>=1);
+			do
+			{
+				sprintf(reg2,"%d",temp3);
+				fwrite(reg2, sizeof(char), strlen(reg2), hashh);
+				conta_digito++;
+			}while(conta_digito<5);
+			
+			sprintf(reg2,"%d",mat[cont][1]);
+   			fwrite(reg2, sizeof(char), strlen(reg2), hashh); //registro é escrito no arquivo 
+   			
+   			sprintf(reg2,"%c",mat[cont][2]);
+   			fwrite(reg2, sizeof(char), 1, hashh); //registro é escrito no arquivo 
 			cont++;
 			//mudar esse 3 (strlen e ve se vai)
 		}while (cont<TAM_HASH);
@@ -103,15 +157,36 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 	else //já tem conteúdo
 	{	
 		
-		int cont=0;		int teste;
-		
+		int cont=0;		
+		int teste;
+		char num1,num2,num3,num4,num5;
 		fseek(hashh,0,0);
 
-		do 
+		do //lendo arquivo hash para a matriz
 		{
-			fread(&teste,sizeof(char),1,hashh); mat[cont][0]=teste;
-			fread(&teste,sizeof(char),1,hashh);	mat[cont][1]=teste;
+			//fread(&teste,sizeof(char),1,hashh); 
+			fread(&num1,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num2,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num3,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num4,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num5,sizeof(char),1,hashh); //le dados para iserir no registro
+					
+			teste=(num1-'0')*10000+(num2-'0')*1000+(num3-'0')*100+(num4-'0')*10+(num5-'0');
+			mat[cont][0]=teste;
+			
+		
+			
+			fread(&num1,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num2,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num3,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num4,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num5,sizeof(char),1,hashh); //le dados para iserir no registro
+					
+			teste=(num1-'0')*10000+(num2-'0')*1000+(num3-'0')*100+(num4-'0')*10+(num5-'0');
+			mat[cont][1]=teste;
+			
 			fread(&teste,sizeof(char),1,hashh);	mat[cont][2]=teste;
+			//printf("%d\n",mat[cont][0]);
 			cont++;
 				
 		}while (cont<TAM_HASH);	
@@ -119,7 +194,7 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 		fseek(out,0,SEEK_END); 
 		temp3=ftell(out);
 		fseek(out,temp3-1,0);
-		fread(&temp_2,sizeof(int),1,out); //será lido a temp_2 para saber em que parte do arquivo está
+		fread(&temp_2,sizeof(int),1,out); //será lido a temp_2 para saber em que parte do arquivo de inserção está
 		fseek(out,0,SEEK_END); //coloca o arquivo saida na ultima posição para inserção
 		fseek(insere,(temp_2)*156,0); //locomove o arquivo insere com a temp_2 salva
 
@@ -147,13 +222,15 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
    		posi=hash.chave%TAM_HASH;
    		
    		printf("\n'%d'+'%d' (%d)\n",atoi(film.cliente),atoi(film.codfilme),temp1);
+   		
    		//duplicados
    		cont=0;
    		do
 		{
+		//	printf("HASH TESTE CHAVE: %d %d\n", hash.chave, mat[cont][0]);
 			if(hash.chave==mat[cont][0])
 			{
-				printf("Duplicado");
+				printf("Duplicado\n");
 				sprintf(reg,"#%c",temp);
    				fwrite(reg, sizeof(char), strlen(reg), out);
 				fclose(out);  fclose(insere); fclose(hashh);
@@ -187,12 +264,13 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 		//conf como ela explicou
 		if(cont>TAM_HASH)
 		{
-			printf("Lotado");
+			printf("Lotado\n");
 			sprintf(reg,"#%c",temp);
    			fwrite(reg, sizeof(char), strlen(reg), out);
    			fclose(out);  fclose(insere); fclose(hashh);
 			return;
 		}
+		
 		printf("Endereco: %d\n", hash.chave%TAM_HASH);
 		if(cont-1!=0)
 			printf("Colisao\nTentativa %d\n",cont-1);//se tentativa igual 0 n teve colisao
@@ -210,8 +288,43 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
    		cont=0;
 		do
 		{
-			sprintf(reg2,"%c%c%c",mat[cont][0],mat[cont][1],mat[cont][2]);
-   			fwrite(reg2, sizeof(char), 3, hashh); //registro é escrito no arquivo
+			
+			int tempp=mat[cont][0];
+			int conta_digito=0;
+			temp3=0;
+			do //qtos digitos tem
+			{
+				tempp=tempp/10; conta_digito++;
+			}while(tempp>=1);
+			do
+			{
+				sprintf(reg2,"%d",temp3);
+				fwrite(reg2, sizeof(char), strlen(reg2), hashh);
+				conta_digito++;
+			}while(conta_digito<5);
+			
+			sprintf(reg2,"%d",mat[cont][0]);
+   			fwrite(reg2, sizeof(char), strlen(reg2), hashh); //registro é escrito no arquivo 
+   			
+   			tempp=mat[cont][1];
+			conta_digito=0;
+			temp3=0;
+			do //qtos digitos tem
+			{
+				tempp=tempp/10; conta_digito++;
+			}while(tempp>=1);
+			do
+			{
+				sprintf(reg2,"%d",temp3);
+				fwrite(reg2, sizeof(char), strlen(reg2), hashh);
+				conta_digito++;
+			}while(conta_digito<5);
+			
+			sprintf(reg2,"%d",mat[cont][1]);
+   			fwrite(reg2, sizeof(char), strlen(reg2), hashh); //registro é escrito no arquivo 
+   			
+   			sprintf(reg2,"%c",mat[cont][2]);
+   			fwrite(reg2, sizeof(char), 1, hashh); //registro é escrito no arquivo 
 			cont++;
 			//mudar esse 3 (strlen e ve se vai)
 		}while (cont<TAM_HASH);
@@ -221,6 +334,7 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 	}
 	fclose(out);  fclose(insere); fclose(hashh);
 }
+
 void remocao(FILE *remove, FILE *hashh)
 {
 	
@@ -236,7 +350,7 @@ void remocao(FILE *remove, FILE *hashh)
 		return ;
 	}
 	
-	int tam_reg=pega_registro(aux,reg);
+	int tam_reg=pega_registro(aux,reg);	//para ver se esta vazio
 	if(tam_reg==0)
 	{
 		sprintf(reg,"%c",1);
@@ -247,61 +361,82 @@ void remocao(FILE *remove, FILE *hashh)
 		fseek(aux,0,SEEK_END);	
 		
 		fseek(aux,ftell(aux)-1,0);	
-		fread(&temp4,sizeof(int),1,aux);//problema aki
+		fread(&temp4,sizeof(int),1,aux);		//por exemplo, se ja leu 1, entao temp4
 		
-		fseek(aux,ftell(aux),0);//fseek(aux,ftell(aux)+1,0);
+		fseek(aux,ftell(aux),0); //fseek(aux,ftell(aux)+1,0);
 		
-		contt= temp4;
+		contt= temp4; //contt -> valor da proxima posicao para ler do arquivo de remover
 		contt=contt+1;
-		sprintf(reg,"%c",contt);
-		fwrite(reg, sizeof(char), strlen(reg), aux);//ele n ta escrevendo n sei pq
+		sprintf(reg,"%c",contt); //escrevendo no arquivo auxremove.
+		fwrite(reg, sizeof(char), strlen(reg), aux);
 		fseek(remove,0,SEEK_END);
-		if(ftell(remove)<=(contt-1)*6)
+		
+		if(ftell(remove)<=(contt-1)*6)	// verifica se tem arquivo pra remover
 		{
 			printf("\nFim de arquivo\n");
 			return;	
 		}
 		else
 		{
-			fseek(remove,(contt-1)*6,0);
+			fseek(remove,(contt-1)*6,0); //posiciona no registro pra remover
 		}
 		
 	}
-	fread(&film.cliente,sizeof(film),1,remove); 
-	fread(&film.codfilme,sizeof(film),1,remove);
+	fread(&film.cliente,sizeof(film.cliente),1,remove); 
+	fread(&film.codfilme,sizeof(film.codfilme),1,remove);
 	strcat(strcpy(temp2,film.cliente),film.codfilme); //copia o codigo cliente e concatena com o condifo do fime
    	temp1=atoi(temp2); 
-	printf("\n%d\n",temp1);
+	//printf("\n%d\n",temp1);
 	
 	int posi,cond=0,cont=0;
 	int mat[13][3];
+	char num1,num2,num3,num4,num5;
 	
 	posi=temp1%TAM_HASH;
 	
 	fseek(hashh,0,0);
 	int teste=0;
-		do 
+		do 	//lendo a arvore hash dnv e passando pra matriz
 		{
-			fread(&teste,sizeof(char),1,hashh);
+			fread(&num1,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num2,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num3,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num4,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num5,sizeof(char),1,hashh); //le dados para iserir no registro
+					
+			teste=(num1-'0')*10000+(num2-'0')*1000+(num3-'0')*100+(num4-'0')*10+(num5-'0');
 			mat[cont][0]=teste;
-			fread(&teste,sizeof(char),1,hashh);
+			
+			teste = 0;
+		
+			
+			fread(&num1,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num2,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num3,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num4,sizeof(char),1,hashh); //le dados para iserir no registro
+			fread(&num5,sizeof(char),1,hashh); //le dados para iserir no registro
+					
+			teste=(num1-'0')*10000+(num2-'0')*1000+(num3-'0')*100+(num4-'0')*10+(num5-'0');
 			mat[cont][1]=teste;
-			fread(&teste,sizeof(char),1,hashh);
-			mat[cont][2]=teste;
+			teste = 0;
+			
+			fread(&teste,sizeof(char),1,hashh);	mat[cont][2]=teste;
+			//printf("%d\n",mat[cont][0]);
 			cont++;
 				
 		}while (cont<TAM_HASH);	
+		
 	cont=0;	
 	do
 	{
-		
-		if(temp1==mat[posi][0])
+		if(temp1==mat[posi][0] && mat[posi][2]==1)		// temp1==mat[posi][0] && mat[posi][2]==1
 		{
-			printf("Encontrou\n",mat[posi][0],posi);
-			mat[posi][0]=0;  //por conta disso at na busca - fazer encontrou [0] e [2]!=0 e !=-1
+			printf("\nEncontrou %d\n",mat[posi][0]);
+			mat[posi][0]=0;  //por conta disso atencao na busca - fazer encontrou [0] e [2]!=0 e !=-1
 			mat[posi][1]=0;
-			mat[posi][2]=-1;
+			mat[posi][2]=-1;	//se encontrou, entao eh vazio falso quando removemos
 			cond=1;
+			printf("Chave removida com sucesso!\n");
 		}
 		posi=posi +1;
 		if(posi>12)
@@ -310,9 +445,10 @@ void remocao(FILE *remove, FILE *hashh)
 				}
 		cont++;
 	}while(cond==0 && cont<TAM_HASH+1);
+	
 	if(cond==0)
 	{
-		printf("Nao Encontrou\n");
+		printf("\nChave %d nao encontrada!\n", temp1);
 		fclose(remove); fclose(hashh);fclose(aux);
 		return;
 	}
@@ -326,8 +462,42 @@ void remocao(FILE *remove, FILE *hashh)
    		cont=0;
 		do
 		{
-			sprintf(reg2,"%c%c%c",mat[cont][0],mat[cont][1],mat[cont][2]);
-   			fwrite(reg2, sizeof(char), 3, hashh); //registro é escrito no arquivo
+			int tempp=mat[cont][0];
+			int conta_digito=0;
+			int temp3=0;
+			do //qtos digitos tem
+			{
+				tempp=tempp/10; conta_digito++;
+			}while(tempp>=1);
+			do
+			{
+				sprintf(reg2,"%d",temp3);
+				fwrite(reg2, sizeof(char), strlen(reg2), hashh);
+				conta_digito++;
+			}while(conta_digito<5);
+			
+			sprintf(reg2,"%d",mat[cont][0]);
+   			fwrite(reg2, sizeof(char), strlen(reg2), hashh); //registro é escrito no arquivo 
+   			
+   			tempp=mat[cont][1];
+			conta_digito=0;
+			temp3=0;
+			do //qtos digitos tem
+			{
+				tempp=tempp/10; conta_digito++;
+			}while(tempp>=1);
+			do
+			{
+				sprintf(reg2,"%d",temp3);
+				fwrite(reg2, sizeof(char), strlen(reg2), hashh);
+				conta_digito++;
+			}while(conta_digito<5);
+			
+			sprintf(reg2,"%d",mat[cont][1]);
+   			fwrite(reg2, sizeof(char), strlen(reg2), hashh); //registro é escrito no arquivo 
+   			
+   			sprintf(reg2,"%c",mat[cont][2]);
+   			fwrite(reg2, sizeof(char), 1, hashh); //registro é escrito no arquivo 
 			cont++;
 			//mudar esse 3 (strlen e ve se vai)
 		}while (cont<TAM_HASH);
@@ -335,29 +505,141 @@ void remocao(FILE *remove, FILE *hashh)
 	fclose(remove); fclose(hashh);fclose(aux);
 }
 
-void busca(FILE *out, FILE *buscar, FILE *hashh)
+void buscar(FILE *out, FILE *busca, FILE *hashh)
 {
-	//arq consultei busca
-	//temp1=atoi(temp2);  e  posi=temp1%TAM_HASH;
-	//do while para buscar
-	//ele busca até achar um vazio (se for vazio falso ele continua)
-	//fazer encontrou [0] e [2]!=0 e !=-1
-	//n encontrou
-	//fim de arq
-	//passar trecos para a matriz
-	//acesso = tentativa+1
-	
-	
-	fclose(out);  fclose(buscar); fclose(hashh);
+
+    int temp1=0;
+    char temp2[100],reg2[160],reg[160];
+    int contt=0;
+    int temp4=0;
+    FILE *aux2;
+    char num1,num2,num3,num4,num5;
+    
+    if ((aux2 = fopen("auxbusca.bin","a+b")) == NULL)
+    {
+        printf("Nao foi possivel abrir o arquivo");
+        return ;
+    }
+    
+    int tam_reg=pega_registro(aux2,reg);    //para ver se esta vazio
+    if(tam_reg==0)
+    {
+        sprintf(reg,"%c",1);
+        fwrite(reg, sizeof(char), strlen(reg), aux2);
+    }
+    else
+    {
+        fseek(aux2,0,SEEK_END);    
+        
+        fseek(aux2,ftell(aux2)-1,0);    
+        fread(&temp4,sizeof(int),1,aux2);        //por exemplo, se ja leu 1, entao temp4
+        
+        fseek(aux2,ftell(aux2),0); //fseek(aux,ftell(aux)+1,0);
+        
+        contt= temp4; //contt -> valor da proxima posicao para ler do arquivo de remover
+        contt=contt+1;
+        sprintf(reg,"%c",contt); //escrevendo no arquivo auxbsca.
+        fwrite(reg, sizeof(char), strlen(reg), aux2);
+        fseek(busca,0,SEEK_END);
+        
+        if(ftell(busca)<=(contt-1)*6)    // verifica se tem arquivo pra buscar
+        {
+            printf("\nFim de arquivo\n");
+            return;    
+        }
+        else
+        {
+            fseek(busca,(contt-1)*6,0); //posiciona no registro pra buscar
+        }
+        
+    }
+    fread(&film.cliente,sizeof(film.cliente),1,busca); 
+    fread(&film.codfilme,sizeof(film.codfilme),1,busca);    
+    
+    strcat(strcpy(temp2,film.cliente),film.codfilme); //copia o codigo cliente e concatena com o condifo do fime
+       temp1=atoi(temp2); 
+    //printf("\n%d\n",temp1);
+    
+    int posi=0,cond=0,cont=0;
+    int mat[13][3];
+    char num6;
+    
+    posi=temp1%TAM_HASH;
+    
+    fseek(hashh,0,0);
+    int teste=0;
+        do     //lendo a arvore hash dnv e passando pra matriz
+        {
+            fread(&num1,sizeof(char),1,hashh); //le dados para iserir no registro
+            fread(&num2,sizeof(char),1,hashh); //le dados para iserir no registro
+            fread(&num3,sizeof(char),1,hashh); //le dados para iserir no registro
+            fread(&num4,sizeof(char),1,hashh); //le dados para iserir no registro
+            fread(&num5,sizeof(char),1,hashh); //le dados para iserir no registro
+                    
+            teste=(num1-'0')*10000+(num2-'0')*1000+(num3-'0')*100+(num4-'0')*10+(num5-'0');
+            mat[cont][0]=teste;
+            teste = 0;
+        
+            
+            fread(&num1,sizeof(char),1,hashh); //le dados para iserir no registro
+            fread(&num2,sizeof(char),1,hashh); //le dados para iserir no registro
+            fread(&num3,sizeof(char),1,hashh); //le dados para iserir no registro
+            fread(&num4,sizeof(char),1,hashh); //le dados para iserir no registro
+            fread(&num5,sizeof(char),1,hashh); //le dados para iserir no registro
+                    
+            teste=(num1-'0')*10000+(num2-'0')*1000+(num3-'0')*100+(num4-'0')*10+(num5-'0');
+            mat[cont][1]=teste;
+            teste = 0;
+            fread(&teste,sizeof(char),1,hashh);    mat[cont][2]=teste;
+            //printf("%d\n",mat[cont][0]);
+            cont++;
+                
+        }while (cont<TAM_HASH);    
+        
+    cont=0;    
+    do
+    {	
+        if(temp1==mat[posi][0] && mat[posi][2]==1)        // temp1==mat[posi][0] && mat[posi][2]==1
+        {
+            printf("\nChave %d encontrada, endereco %d, %d acesso\n", mat[posi][0],posi,cont);
+                fseek(out,mat[posi][1],0);
+                
+                fread(&num6,sizeof(char),1,out);//posição para se locomover
+                char filme[(int)num6];
+                fread(&filme,sizeof(filme),1,out);
+                exibirTela(filme);   
+                cond = 1; 
+            
+            
+        }
+        posi=posi +1;
+        if(posi>12)
+                {
+                    posi=0;
+                }
+        cont++;
+    }while(cond==0 && cont<TAM_HASH+1);
+    
+    if(cond==0)
+    {
+        printf("\nChave %d nao encontrada!\n", temp1);
+        
+    }
+    
+    
+        fclose(out); fclose(hashh);fclose(aux2); fclose(busca);
+
 }
+
+
 int main()
 {
 	int op=1;
-	FILE *insere,*out, *hashh, *remove, *buscar;
+	FILE *insere,*out, *hashh, *remove, *busca;
 
 	while(op!=4)
 	{
-		printf("\n1- Insercao\n2-Remocao\n3-Busca\n4-Sair\nEscolha uma opcao:");
+		printf("\n1-Insercao\n2-Remocao\n3-Busca\n4-Sair\nEscolha uma opcao:");
 		scanf("%d",&op);
 		printf("\n");
 			switch(op)
@@ -402,7 +684,7 @@ int main()
 						remocao(remove,hashh);	
 					break;
 				case 3:
-					if ((buscar = fopen("buscar.bin","r+b")) == NULL)
+					if ((busca = fopen("busca.bin","r+b")) == NULL)
 						 {
 							printf("Nao foi possivel abrir o arquivo");
 							return 0;
@@ -421,7 +703,7 @@ int main()
 							return 0;
 						 }
 						printf("\nhashh.bin carregado");
-						busca(out,buscar,hashh);
+						buscar(out,busca,hashh);
 					break;
 				case 4:
 						printf("\nSaindo...\n");break;
