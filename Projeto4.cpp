@@ -6,11 +6,11 @@
 Grupo Gustavo Rosseto e Pedro Gonçalves
 */
 
-//Arq Hash Inserir qse acabado
-//Remover Arq Hash
-//Buscar
+//Arq Hash Inserir acho q ta certo //Remover Arq Hash acho q ta certo
+//Buscar (começar)
 //Posi =8 é 8 ou 7 (0,1,...) no vetor
-///////Terminar inserção (ve o q falta, arq lotado, volta sla...)
+//overflow progressivo?
+//conf arq principal
 struct estrutura
   	{
     	char cliente[3],codfilme[3],nome[50], filme[50], genero[50];
@@ -69,16 +69,12 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
    		
    		int cont=0;
    		
-		hash.chave=0;
-   		hash.RRN=0;
-   		hash.flag=0;
+		hash.chave=0; hash.RRN=0; hash.flag=0;
    		
    		for(int i=0;i<TAM_HASH;i++)
    		{
-   		mat[i][0]=hash.chave;
-   			mat[i][1]=hash.RRN;
-   			mat[i][2]=hash.flag;
-		   }
+   			mat[i][0]=hash.chave; mat[i][1]=hash.RRN; mat[i][2]=hash.flag;
+		}
    		fseek(hashh,0,0); //tem q escrever no começo (nesse teste) e ta indo no final
    		//ve pq
    		hash.chave=temp1;
@@ -90,9 +86,8 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
    		printf("\n'%d'+'%d' (%d)\n",atoi(film.cliente),atoi(film.codfilme),temp1);
    		printf("Endereco: %d\n", posi);
    		printf("Chave inserida com sucesso\n");
-   		mat[posi][0]=hash.chave;
-   		mat[posi][1]=hash.RRN;
-   		mat[posi][2]=hash.flag;
+   		
+		mat[posi][0]=hash.chave; mat[posi][1]=hash.RRN; mat[posi][2]=hash.flag;
    		
    		cont=0;
 		do
@@ -104,23 +99,19 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 			//mudar esse 3 (strlen e ve se vai)
 		}while (cont<TAM_HASH);
 
-   		}
+   	}
 	else //já tem conteúdo
 	{	
 		
-		int cont=0;
-		int teste;
-		char teste2;
+		int cont=0;		int teste;
+		
 		fseek(hashh,0,0);
 
 		do 
 		{
-			fread(&teste,sizeof(char),1,hashh);
-			mat[cont][0]=teste;
-			fread(&teste,sizeof(char),1,hashh);
-			mat[cont][1]=teste;
-			fread(&teste,sizeof(char),1,hashh);
-			mat[cont][2]=teste;
+			fread(&teste,sizeof(char),1,hashh); mat[cont][0]=teste;
+			fread(&teste,sizeof(char),1,hashh);	mat[cont][1]=teste;
+			fread(&teste,sizeof(char),1,hashh);	mat[cont][2]=teste;
 			cont++;
 				
 		}while (cont<TAM_HASH);	
@@ -134,9 +125,7 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 
 		if((((int)temp_2)*156)>=tam_arq)  //se a temp_2 for maior que o tamanho arquivo insere significa que chegou ao fim
 		{ 
-			printf("\nArquivo insere.bin chegou ao fim\n");
-			
-			 return;
+			printf("\nArquivo insere.bin chegou ao fim\n");	 return;
 		}
 		
    		fread(&film,sizeof(film),1,insere); 
@@ -158,7 +147,6 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
    		posi=hash.chave%TAM_HASH;
    		
    		printf("\n'%d'+'%d' (%d)\n",atoi(film.cliente),atoi(film.codfilme),temp1);
-   		
    		//duplicados
    		cont=0;
    		do
@@ -171,7 +159,6 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 				fclose(out);  fclose(insere); fclose(hashh);
 				return;
 			}
-		
 			cont++;
 		}while (cont<TAM_HASH);
    		
@@ -179,22 +166,24 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
    		cont=0;
    		
    		do 
-   		{
-   			if (mat[posi][2]==0)//att falso vazio n considerando aki
+   		{											//-1 assign unsegn 255
+   			if (mat[posi][2]==0 || mat[posi][2]==255)
    			{
    				cond=1;
+   				
 			   }
 			else
 			{
 				posi=posi+1;
-				if(posi>12)//att aki
+				if(posi>12)
 				{
 					posi=0;
 				}
 			}
 			cont++;
+			
 		   }while(cond==0 && cont<TAM_HASH+1);
-		//acho q seria aki um falso vazio do conferindo -1
+		
 		//conf como ela explicou
 		if(cont>TAM_HASH)
 		{
@@ -232,15 +221,143 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 	}
 	fclose(out);  fclose(insere); fclose(hashh);
 }
+void remocao(FILE *remove, FILE *hashh)
+{
+	
+	int temp1=0;
+	char temp2[100],reg2[160],reg[160];
+	int contt=0;
+	int temp4=0;
+	FILE *aux;
+	
+	if ((aux = fopen("auxremove.bin","a+b")) == NULL)
+	{
+		printf("Nao foi possivel abrir o arquivo");
+		return ;
+	}
+	
+	int tam_reg=pega_registro(aux,reg);
+	if(tam_reg==0)
+	{
+		sprintf(reg,"%c",1);
+		fwrite(reg, sizeof(char), strlen(reg), aux);
+	}
+	else
+	{
+		fseek(aux,0,SEEK_END);	
+		
+		fseek(aux,ftell(aux)-1,0);	
+		fread(&temp4,sizeof(int),1,aux);//problema aki
+		
+		fseek(aux,ftell(aux),0);//fseek(aux,ftell(aux)+1,0);
+		
+		contt= temp4;
+		contt=contt+1;
+		sprintf(reg,"%c",contt);
+		fwrite(reg, sizeof(char), strlen(reg), aux);//ele n ta escrevendo n sei pq
+		fseek(remove,0,SEEK_END);
+		if(ftell(remove)<=(contt-1)*6)
+		{
+			printf("\nFim de arquivo\n");
+			return;	
+		}
+		else
+		{
+			fseek(remove,(contt-1)*6,0);
+		}
+		
+	}
+	fread(&film.cliente,sizeof(film),1,remove); 
+	fread(&film.codfilme,sizeof(film),1,remove);
+	strcat(strcpy(temp2,film.cliente),film.codfilme); //copia o codigo cliente e concatena com o condifo do fime
+   	temp1=atoi(temp2); 
+	printf("\n%d\n",temp1);
+	
+	int posi,cond=0,cont=0;
+	int mat[13][3];
+	
+	posi=temp1%TAM_HASH;
+	
+	fseek(hashh,0,0);
+	int teste=0;
+		do 
+		{
+			fread(&teste,sizeof(char),1,hashh);
+			mat[cont][0]=teste;
+			fread(&teste,sizeof(char),1,hashh);
+			mat[cont][1]=teste;
+			fread(&teste,sizeof(char),1,hashh);
+			mat[cont][2]=teste;
+			cont++;
+				
+		}while (cont<TAM_HASH);	
+	cont=0;	
+	do
+	{
+		
+		if(temp1==mat[posi][0])
+		{
+			printf("Encontrou\n",mat[posi][0],posi);
+			mat[posi][0]=0;  //por conta disso at na busca - fazer encontrou [0] e [2]!=0 e !=-1
+			mat[posi][1]=0;
+			mat[posi][2]=-1;
+			cond=1;
+		}
+		posi=posi +1;
+		if(posi>12)
+				{
+					posi=0;
+				}
+		cont++;
+	}while(cond==0 && cont<TAM_HASH+1);
+	if(cond==0)
+	{
+		printf("Nao Encontrou\n");
+		fclose(remove); fclose(hashh);fclose(aux);
+		return;
+	}
+	
+	fclose(hashh);
+		if ((hashh = fopen("hash.bin","w+b")) == NULL)
+						 {
+							printf("Nao foi possivel abrir o arquivo");
+							return ;
+						 }
+   		cont=0;
+		do
+		{
+			sprintf(reg2,"%c%c%c",mat[cont][0],mat[cont][1],mat[cont][2]);
+   			fwrite(reg2, sizeof(char), 3, hashh); //registro é escrito no arquivo
+			cont++;
+			//mudar esse 3 (strlen e ve se vai)
+		}while (cont<TAM_HASH);
+	
+	fclose(remove); fclose(hashh);fclose(aux);
+}
 
+void busca(FILE *out, FILE *buscar, FILE *hashh)
+{
+	//arq consultei busca
+	//temp1=atoi(temp2);  e  posi=temp1%TAM_HASH;
+	//do while para buscar
+	//ele busca até achar um vazio (se for vazio falso ele continua)
+	//fazer encontrou [0] e [2]!=0 e !=-1
+	//n encontrou
+	//fim de arq
+	//passar trecos para a matriz
+	//acesso = tentativa+1
+	
+	
+	fclose(out);  fclose(buscar); fclose(hashh);
+}
 int main()
 {
 	int op=1;
-	FILE *insere,*out, *hashh;
+	FILE *insere,*out, *hashh, *remove, *buscar;
 
 	while(op!=4)
 	{
-		printf("\n1- Insercao\n2-Procurar por chave primaria\n3-Procurar por chave secundaria\n4-Sair\nEscolha uma opcao:");
+		printf("\n1- Insercao\n2-Remocao\n3-Busca\n4-Sair\nEscolha uma opcao:");
 		scanf("%d",&op);
 		printf("\n");
 			switch(op)
@@ -269,6 +386,43 @@ int main()
 
 						insercao(out,insere,hashh);	
 						break;
+				case 2:
+					if ((remove = fopen("remove.bin","r+b")) == NULL)
+						 {
+							printf("Nao foi possivel abrir o arquivo");
+							return 0;
+						 }
+						 printf("\nremove.bin carregado");
+					if ((hashh = fopen("hash.bin","a+b")) == NULL)
+						 {
+							printf("Nao foi possivel abrir o arquivo");
+							return 0;
+						 }
+						printf("\nhashh.bin carregado");
+						remocao(remove,hashh);	
+					break;
+				case 3:
+					if ((buscar = fopen("buscar.bin","r+b")) == NULL)
+						 {
+							printf("Nao foi possivel abrir o arquivo");
+							return 0;
+						 }
+						  printf("\nbuscar.bin carregado");
+					if ((out = fopen("principal.bin","a+b")) == NULL)
+						 {
+							printf("Nao foi possivel abrir o arquivo");
+							return 0;
+						 }
+						printf("\nprincipal.bin carregado");
+						
+						if ((hashh = fopen("hash.bin","a+b")) == NULL)
+						 {
+							printf("Nao foi possivel abrir o arquivo");
+							return 0;
+						 }
+						printf("\nhashh.bin carregado");
+						busca(out,buscar,hashh);
+					break;
 				case 4:
 						printf("\nSaindo...\n");break;
 				default: printf("\nErro\n");
