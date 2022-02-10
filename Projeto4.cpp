@@ -2,12 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #define TAM_HASH 13
-/*
-Grupo Gustavo Rosseto e Pedro Gonçalves
-*/
-//Fazer testes, reduzir, melhorar variaveis, CONFERIR TENTATIVAS, ACESSOS, POSIÇÃO
-//Reduzir mais o cod - colocar no Github
-//att linha 302 - procurachave
+/* Grupo Gustavo Rosseto e Pedro Gonçalves */
+//Fazer testes //att linha 141 - procurachave
 struct estrutura
   	{
     	char cliente[3],codfilme[3],nome[50], filme[50], genero[50];
@@ -148,7 +144,7 @@ int procuraChave(int temp1, int mat[13][3], int *posi, int *cont)
 }
 void insercao(FILE  *out,FILE *insere, FILE *hashh)
 {
-    int temp,temp_2=0,tam_reg,tam_arq,temp1,temp4=0,temp3,mat[13][3], posi=0,cont=0,teste=0,cond=0;
+    int temp,temp_2=0,tam_reg,tam_arq,temp1,temp3,mat[13][3], posi=0,cont=0,teste=0,cond=0,i,pos=0;
 	char reg[160],reg2[160],temp2[100],num1,num2,num3,num4,num5;
 	
 	fseek(insere,0,SEEK_END); //coloca o arquivo no fim
@@ -156,7 +152,7 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 	fseek(insere,0,0);	     //coloca o arquivo no início
 	
 	fseek(out,0,SEEK_END);	//mesma coisa mas do arquivo de saida
-	int pos=ftell(out);
+	pos=ftell(out);
 	fseek(out,0,0);
 	
 	tam_reg=pega_registro(out,reg); // tam_reg == 0, arquivo vazio
@@ -176,8 +172,7 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
    		
 		hash.chave=0; hash.RRN=0; hash.flag=0;	//zera as variaveis 
    		
-   		int i;
-   		for( i=0;i<TAM_HASH;i++)
+   		for(i=0;i<TAM_HASH;i++)
    		{
    			mat[i][0]=hash.chave; mat[i][1]=hash.RRN; mat[i][2]=hash.flag;		//zerando a matriz inteira.
 		}
@@ -252,8 +247,7 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 			cont++;
 		}while (cont<TAM_HASH);
    		
-   		cond=0;
-   		cont=0;
+   		cond=0; cont=0;
    		do 
    		{											//-1 assign unsegn 255
    			if (mat[posi][2]==0 || mat[posi][2]==255)
@@ -280,15 +274,13 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 		if(cont-1!=0)
 			printf("Colisao\nTentativa %d\n",cont-1);//se tentativa igual 0 n teve colisao
 		printf("Chave inserida com sucesso\n");
-   		mat[posi][0]=hash.chave;
-   		mat[posi][1]=hash.RRN;
-   		mat[posi][2]=hash.flag;
+   		mat[posi][0]=hash.chave; mat[posi][1]=hash.RRN; mat[posi][2]=hash.flag;
    		
    		fclose(hashh);
 		if ((hashh = fopen("hash.bin","w+b")) == NULL)
-			{
-				printf("Nao foi possivel abrir o arquivo");	return ;
-			}
+		{
+			printf("Nao foi possivel abrir o arquivo");	return ;
+		}
 		salvaNoArquivo(mat,hashh);
    		
    		sprintf(reg,"%c#%s#%s#%s#%s#%s#%c",temp_2,film.cliente,film.codfilme,film.nome,film.filme,film.genero,temp);
@@ -298,8 +290,8 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 }
 void remocao(FILE *remove, FILE *hashh)
 {
-	int temp1=0,posi=0,cond=0,cont=0,mat[13][3],teste=0,valor=0,tam_reg=0;
-	char temp2[100],reg2[160],reg[160],num1,num2,num3,num4,num5;
+	int temp1=0,posi=0,cond=0,cont=0,mat[13][3],temp3=0,valor=0,tam_reg=0;
+	char temp2[100],reg[160],num1,num2,num3,num4,num5;
 	
 	FILE *aux;
 	
@@ -324,13 +316,13 @@ void remocao(FILE *remove, FILE *hashh)
 	
 		do 	//lendo a arvore hash dnv e passando pra matriz
 		{
-			teste = lerNumero(num1,num2,num3,num4,num5,hashh);
-			mat[cont][0]=teste;
-			teste = 0;
-			teste = lerNumero(num1,num2,num3,num4,num5,hashh);
-			mat[cont][1]=teste;
-			teste = 0;
-			fread(&teste,sizeof(char),1,hashh);	mat[cont][2]=teste;
+			temp3 = lerNumero(num1,num2,num3,num4,num5,hashh);
+			mat[cont][0]=temp3;
+			temp3 = 0;
+			temp3 = lerNumero(num1,num2,num3,num4,num5,hashh);
+			mat[cont][1]=temp3;
+			temp3 = 0;
+			fread(&temp3,sizeof(char),1,hashh);	mat[cont][2]=temp3;
 			cont++;		
 		}while (cont<TAM_HASH);	
 		
@@ -353,9 +345,9 @@ void remocao(FILE *remove, FILE *hashh)
 	
 	fclose(hashh);
 	if ((hashh = fopen("hash.bin","w+b")) == NULL)
-		{
-			printf("Nao foi possivel abrir o arquivo"); return ;
-		}
+	{
+		printf("Nao foi possivel abrir o arquivo"); return ;
+	}
 
 	salvaNoArquivo(mat,hashh);
 	fclose(remove); fclose(hashh);fclose(aux);
@@ -363,10 +355,9 @@ void remocao(FILE *remove, FILE *hashh)
 
 void buscar(FILE *out, FILE *busca, FILE *hashh)
 {
-    int temp1=0,posi=0,cond=0,cont=0,mat[13][3],teste=0,tam_reg=0,valor;
-    char temp2[100],reg2[160],reg[160],num6;
+    int temp1=0,posi=0,cond=0,cont=0,mat[13][3],temp3=0,tam_reg=0,valor;
+    char temp2[100],reg[160],num1,num2,num3,num4,num5,num6;
     FILE *aux2;
-    char num1,num2,num3,num4,num5;
     
     if ((aux2 = fopen("auxbusca.bin","a+b")) == NULL)
     {
@@ -391,13 +382,13 @@ void buscar(FILE *out, FILE *busca, FILE *hashh)
     
         do     //lendo a arvore hash dnv e passando pra matriz
         {
-            teste = lerNumero(num1,num2,num3,num4,num5,hashh);      
-            mat[cont][0]=teste;
-            teste = 0;
-            teste = lerNumero(num1,num2,num3,num4,num5,hashh);       
-            mat[cont][1]=teste;
-            teste = 0;
-            fread(&teste,sizeof(char),1,hashh);    mat[cont][2]=teste;
+            temp3 = lerNumero(num1,num2,num3,num4,num5,hashh);      
+            mat[cont][0]=temp3;
+            temp3 = 0;
+            temp3 = lerNumero(num1,num2,num3,num4,num5,hashh);       
+            mat[cont][1]=temp3;
+            temp3 = 0;
+            fread(&temp3,sizeof(char),1,hashh);    mat[cont][2]=temp3;
             cont++;       
         }while (cont<TAM_HASH);    
         
