@@ -3,7 +3,6 @@
 #include <string.h>
 #define TAM_HASH 13
 /* Grupo Gustavo Rosseto e Pedro Gonçalves */
-//Fazer testes //att linha 141 - procurachave
 struct estrutura
   	{
     	char cliente[3],codfilme[3],nome[50], filme[50], genero[50];
@@ -18,6 +17,7 @@ char *identifica_campo(char *ts,int num)
 {
 	if(num==1)
 		return strtok(ts,"#");
+	return 0;
 }	
 int pega_registro(FILE *p_out, char *p_reg) //utilizado para saber se o registro está vazio ou não
 {
@@ -90,8 +90,9 @@ void salvaNoArquivo (int mat[13][3], FILE *hashh)
 			cont++;
 		}while (cont<TAM_HASH);
 }
-int lerNumero(char num1,char num2,char num3,char num4,char num5, FILE *hashh)
+int lerNumero(FILE *hashh)
 {
+	char num1,num2,num3,num4,num5;
 	fread(&num1,sizeof(char),1,hashh); //le dados para iserir no registro
 	fread(&num2,sizeof(char),1,hashh); //le dados para iserir no registro
 	fread(&num3,sizeof(char),1,hashh); //le dados para iserir no registro
@@ -144,15 +145,14 @@ int procuraChave(int temp1, int mat[13][3], int *posi, int *cont)
 }
 void insercao(FILE  *out,FILE *insere, FILE *hashh)
 {
-    int temp,temp_2=0,tam_reg,tam_arq,temp1,temp3,mat[13][3], posi=0,cont=0,teste=0,cond=0,i,pos=0;
-	char reg[160],reg2[160],temp2[100],num1,num2,num3,num4,num5;
+    int temp,temp_2=0,tam_reg,tam_arq,temp1,temp3,mat[13][3], posi=0,cont=0,teste=0,cond=0,i;
+	char reg[160],temp2[100];
 	
 	fseek(insere,0,SEEK_END); //coloca o arquivo no fim
 	tam_arq=ftell(insere);   //pega tamnho do arquivo
 	fseek(insere,0,0);	     //coloca o arquivo no início
 	
 	fseek(out,0,SEEK_END);	//mesma coisa mas do arquivo de saida
-	pos=ftell(out);
 	fseek(out,0,0);
 	
 	tam_reg=pega_registro(out,reg); // tam_reg == 0, arquivo vazio
@@ -195,10 +195,10 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 		fseek(hashh,0,0);
 		do //lendo arquivo hash para a matriz
 		{	
-			teste = lerNumero(num1,num2,num3,num4,num5,hashh);
+			teste = lerNumero(hashh);
 			mat[cont][0]=teste;
 			teste=0;
-			teste = lerNumero(num1,num2,num3,num4,num5,hashh);
+			teste = lerNumero(hashh);
 			mat[cont][1]=teste;
 			teste=0;
 			fread(&teste,sizeof(char),1,hashh);	mat[cont][2]=teste;
@@ -291,7 +291,7 @@ void insercao(FILE  *out,FILE *insere, FILE *hashh)
 void remocao(FILE *remove, FILE *hashh)
 {
 	int temp1=0,posi=0,cond=0,cont=0,mat[13][3],temp3=0,valor=0,tam_reg=0;
-	char temp2[100],reg[160],num1,num2,num3,num4,num5;
+	char temp2[100],reg[160];
 	
 	FILE *aux;
 	
@@ -316,10 +316,10 @@ void remocao(FILE *remove, FILE *hashh)
 	
 		do 	//lendo a arvore hash dnv e passando pra matriz
 		{
-			temp3 = lerNumero(num1,num2,num3,num4,num5,hashh);
+			temp3 = lerNumero(hashh);
 			mat[cont][0]=temp3;
 			temp3 = 0;
-			temp3 = lerNumero(num1,num2,num3,num4,num5,hashh);
+			temp3 = lerNumero(hashh);
 			mat[cont][1]=temp3;
 			temp3 = 0;
 			fread(&temp3,sizeof(char),1,hashh);	mat[cont][2]=temp3;
@@ -356,7 +356,7 @@ void remocao(FILE *remove, FILE *hashh)
 void buscar(FILE *out, FILE *busca, FILE *hashh)
 {
     int temp1=0,posi=0,cond=0,cont=0,mat[13][3],temp3=0,tam_reg=0,valor;
-    char temp2[100],reg[160],num1,num2,num3,num4,num5,num6;
+    char temp2[100],reg[160],num6;
     FILE *aux2;
     
     if ((aux2 = fopen("auxbusca.bin","a+b")) == NULL)
@@ -382,10 +382,10 @@ void buscar(FILE *out, FILE *busca, FILE *hashh)
     
         do     //lendo a arvore hash dnv e passando pra matriz
         {
-            temp3 = lerNumero(num1,num2,num3,num4,num5,hashh);      
+            temp3 = lerNumero(hashh);      
             mat[cont][0]=temp3;
             temp3 = 0;
-            temp3 = lerNumero(num1,num2,num3,num4,num5,hashh);       
+            temp3 = lerNumero(hashh);       
             mat[cont][1]=temp3;
             temp3 = 0;
             fread(&temp3,sizeof(char),1,hashh);    mat[cont][2]=temp3;
@@ -463,8 +463,7 @@ int main()
 							printf("Nao foi possivel abrir o arquivo");	return 0;
 						 }
 						printf("\nprincipal.bin carregado");
-						
-						if ((hashh = fopen("hash.bin","a+b")) == NULL)
+					if ((hashh = fopen("hash.bin","a+b")) == NULL)
 						 {
 							printf("Nao foi possivel abrir o arquivo");	return 0;
 						 }
