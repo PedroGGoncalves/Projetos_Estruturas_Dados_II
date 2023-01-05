@@ -21,11 +21,14 @@ O objetivo do exercício é gerenciar um sistema de streaming de filmes de uma d
 * Na avaliação, foi dito que para o código conseguir nota máxima, era necessário utilizar a função ```procura chave()``` no processo de inserção (está sendo usado apenas na remoção e busca).
 
 ## ⚙️ Arquivos
+
+Projeto 3
 * Proj3.pdf - Documentos com informações para desenvolvimento do Projeto 3
-* insere_busca.cpp - Código referente ao gerador de arquivos para  inserção, remoção e busca do Projeto 4
+* insere_busca.cpp - Código referente ao gerador de arquivos para  inserção, remoção e busca do Projeto 3
 * Projeto3.c - Código referente ao Projeto 3
 * arvb.cpp - Código da Árvore B feito separadamente para melhor entendimento
 
+Projeto 4
 * Projeto4.cpp - Código referente ao Projeto 4
 * insere_busca_remove.cpp - Código referente ao gerador de arquivos para inserção, remoção e busca do Projeto 4
 * Ex Hash.pdf - Documentos com informações para desenvolvimento do Projeto 4
