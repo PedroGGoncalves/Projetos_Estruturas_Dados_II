@@ -10,6 +10,8 @@ Projetos desenvolvidos em C/C++ na disciplina Estruturas de Dados II
 
 ## 📋 Descrição de cada projeto
 ### Projeto 1
+O objetivo do exercício é gerenciar um sistema de streaming de filmes de uma dada empresa. As funções eram de inserção, remoção e compactação de arquivo
+* Na avaliação, a nota máxima não foi obtida, porque o método de remoção feito foi feito de modo que caso não encontrasse o objeto para ser removido ele iria pro próximo. Entretanto, caso não encontrasse o objeto, ele não deveria fazer nada. Além disso, houve um problema na inserção, que era o fato de ele não inseririr no lugar de um removido, isso ocorreu porque a condição para isso estava apenas vendo o primeiro e não percorrendo o arquivo. Se não me engano, ambos problemas foram corrigidos e atualizados aqui no código do projeto.
 
 ### Projeto 2
 O objetivo do exercício é gerenciar um sistema de streaming de filmes de uma dada empresa. Para isso foi utilizado os conceitos de chave primária e secundária.
@@ -22,9 +24,14 @@ O objetivo do exercício é gerenciar um sistema de streaming de filmes de uma d
 * Na avaliação, foi dito que para o código conseguir nota máxima, era necessário utilizar a função ```procura chave()``` no processo de inserção (está sendo usado apenas na remoção e busca).
 
 ## ⚙️ Arquivos
+Projeto 1
+* Projeto 1.pdf - Documentos com informações para desenvolvimento do Projeto 1
+* insere.cpp - Código referente ao gerador de arquivos para inserção do Projeto 1
+* Projeto1.c - Código referente ao Projeto 1
+
 Projeto 2
 * Projeto 2.pdf - Documentos com informações para desenvolvimento do Projeto 2
-* insere_busca_p_s.cpp - Código referente ao gerador de arquivos para  inserção e busca do Projeto 2
+* insere_busca_p_s.cpp - Código referente ao gerador de arquivos para inserção e busca do Projeto 2
 * Projeto2.c - Código referente ao Projeto 2
 
 Projeto 3
