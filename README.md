@@ -16,7 +16,8 @@ Projetos desenvolvidos em C/C++ na disciplina Estruturas de Dados II
 ### Projeto 3
 
 ### Projeto 4
-O objetivo do exercício é gerenciar um sistema de streaming de filmes de uma dada empresa. Para isso será utilizado os conceitos de Hash
+O objetivo do exercício é gerenciar um sistema de streaming de filmes de uma dada empresa. Para isso foi utilizado os conceitos de Hash.
+* Na avaliação, foi dito que para o código conseguir nota máxima, era necessário utilizar a função procura chave() no processo de inserção (está sendo usado apenas na remoção e busca).
 
 ## ⚙️ Arquivos
 * Projeto4.cpp - Código referente ao Projeto 4
